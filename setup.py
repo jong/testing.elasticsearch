@@ -4,7 +4,7 @@ from distutils.core import setup
 def main():
     setup(
         name='testing.elasticsearch',
-        packages=['testing.elasticsearch'],
+        packages=['testing'],
         package_dir={'': 'src'},
         version=open('VERSION.txt').read().strip(),
         author='Jon Gartman',
@@ -21,9 +21,13 @@ def main():
             "Natural Language :: English",
             "Topic :: Software Development :: Libraries :: Python Modules",
         ],
-        long_description=open('README.rst').read(),
+        long_description=open('README').read(),
         install_requires=[
             "clom==0.7.5",
             "requests==2.6.0",
         ],
     )
+
+
+if __name__ == "__main__":
+    main()
