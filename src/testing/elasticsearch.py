@@ -24,7 +24,7 @@ def _unused_port():
 class ElasticSearchServer(object):
     def __init__(self, root=None, cmd=None):
         """
-        root = Root directoy for elasticsearch data and logs. This directory will
+        root:  Root directory for elasticsearch data and logs. This directory will
                contain index data and logs for this instance of elasticsearch.
 
                http://www.elastic.co/guide/en/elasticsearch/reference/current/setup-dir-layout.html
@@ -32,11 +32,12 @@ class ElasticSearchServer(object):
                If you specify a `root` directory, it will not be removed on
                exit. This gives you a chance to look at logs and preserve (or
                reuse) data.
+        cmd: The `elasticsearch` command to run if `elasticsearch` is not in $PATH.
 
         Usage of this class:
 
-            with ElasticSearch(root="/tmp/testing.elasticsearch") as es_dsn:
-                es = YourElasticSearchClient(es_dsn)
+            with ElasticSearch(root="/tmp/testing.elasticsearch") as es:
+                es = YourElasticSearchClient(es.uri())
 
             # elasticsearch terminated here when context exits
         """
@@ -62,13 +63,33 @@ class ElasticSearchServer(object):
     def __exit__(self, *args):
         self.stop()
 
-    def dsn(self):
+    def uri(self):
         """
-        Returns the elasticsearch dsn for the testing instance.
+        Returns the elasticsearch uri for the testing instance.
         """
-        if not self._bind_host and self._bind_port:
+        if not self._bind_host or not self._bind_port:
             return
-        return "{0._bind_host}:{0._bind_port}".format(self)
+        return "http://{0._bind_host}:{0._bind_port}".format(self)
+
+    def _configure(self):
+        """
+        Configure this instance of elasticsearch before trying to start the
+        server.
+
+        This method exists mainly for unit test hooks so that we can prepare
+        to start the elasticsearch server without actually making it start up,
+        which takes a relatively long time.
+        """
+        # setup home dir
+        if not self._root:
+            self._use_tmp_dir = True
+            self._root = tempfile.mkdtemp(suffix='-elastic')
+
+        self._data_path = os.path.join(self._root, 'data')
+        self._logs_path = os.path.join(self._root, 'logs')
+
+        self._bind_host = "127.0.0.1"
+        self._bind_port = _unused_port()
 
     def start(self):
         """
@@ -78,21 +99,15 @@ class ElasticSearchServer(object):
             # already started
             return
 
-        # setup home dir
-        if not self._root:
-            self._use_tmp_dir = True
-            self._root = tempfile.mkdtemp(suffix='-elastic')
-
-        self._bind_host = "127.0.0.1"
-        self._bind_port = _unused_port()
+        self._configure()
 
         pid = os.fork()
         if pid == 0:
             # now start elasticsearch
             bind_host = '-Des.network.bind_host=%s' % self._bind_host
             bind_port = '-Des.http.port=%s' % self._bind_port
-            data_path = '-Des.path.data=%s' % os.path.join(self._root, 'data')
-            logs_path = '-Des.path.logs=%s' % os.path.join(self._root, 'logs')
+            data_path = '-Des.path.data=%s' % self._data_path
+            logs_path = '-Des.path.logs=%s' % self._logs_path
 
             try:
                 os.execl(
@@ -108,7 +123,7 @@ class ElasticSearchServer(object):
         else:
             while True:
                 try:
-                    result = requests.get('http://' + self.dsn())
+                    result = requests.get(self.uri())
                     if result.status_code == 200:
                         break
                 except requests.exceptions.ConnectionError:
