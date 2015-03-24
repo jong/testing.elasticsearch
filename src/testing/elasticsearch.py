@@ -22,7 +22,7 @@ def _unused_port():
 
 
 class ElasticSearchServer(object):
-    def __init__(self, root=None, cmd=None):
+    def __init__(self, root=None, cmd=None, foreground=True):
         """
         root:  Root directory for elasticsearch data and logs. This directory will
                contain index data and logs for this instance of elasticsearch.
@@ -44,6 +44,8 @@ class ElasticSearchServer(object):
         if cmd is None:
             cmd = str(clom.which('elasticsearch').shell())
         self._cmd = cmd
+
+        self._foreground = foreground
 
         self._use_tmp_dir = False
         self._root = root
@@ -109,6 +111,12 @@ class ElasticSearchServer(object):
             data_path = '-Des.path.data=%s' % self._data_path
             logs_path = '-Des.path.logs=%s' % self._logs_path
 
+            # Older version of elastic don't automatically stay in the foreground
+            # and need to be instructed with '-f'
+            foreground = ""
+            if self._foreground:
+                foreground = "-f"
+
             try:
                 os.execl(
                     self._cmd,
@@ -116,7 +124,8 @@ class ElasticSearchServer(object):
                     bind_host,
                     bind_port,
                     data_path,
-                    logs_path
+                    logs_path,
+                    foreground
                 )
             except Exception:
                 raise RuntimeError("Could not start elasticsearch.")
