@@ -105,8 +105,8 @@ class ElasticSearchServer(object):
 
         pid = os.fork()
         if pid == 0:
-            # now start elasticsearch
             bind_host = '-Des.network.bind_host=%s' % self._bind_host
+            network_host = '-Des.network.host=%s' % self._bind_host
             bind_port = '-Des.http.port=%s' % self._bind_port
             data_path = '-Des.path.data=%s' % self._data_path
             logs_path = '-Des.path.logs=%s' % self._logs_path
@@ -122,9 +122,16 @@ class ElasticSearchServer(object):
                     self._cmd,
                     self._cmd,
                     bind_host,
+                    network_host,
                     bind_port,
                     data_path,
                     logs_path,
+
+                    # Disable this instance from trying to join a cluster.
+                    "-Des.node.master=true",
+                    "-Des.node.local=true",
+                    "-Des.discovery.zen.ping.multicast.enabled=false",
+                    "-Des.logger.level=DEBUG",
                     foreground
                 )
             except Exception:
