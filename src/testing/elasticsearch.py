@@ -5,8 +5,8 @@ import signal
 from shutil import rmtree
 from time import sleep
 from datetime import datetime
+from subprocess import Popen, PIPE
 
-from clom import clom
 import requests
 
 
@@ -42,7 +42,8 @@ class ElasticSearchServer(object):
             # elasticsearch terminated here when context exits
         """
         if cmd is None:
-            cmd = str(clom.which('elasticsearch').shell())
+            es_check = Popen(['which', 'elasticsearch'], stdout=PIPE)
+            cmd = es_check.stdout.read().strip()
         self._cmd = cmd
 
         self._foreground = foreground
