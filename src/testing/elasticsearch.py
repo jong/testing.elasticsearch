@@ -44,6 +44,9 @@ class ElasticSearchServer(object):
         if cmd is None:
             es_check = Popen(['which', 'elasticsearch'], stdout=PIPE)
             cmd = es_check.stdout.read().strip()
+        if not cmd or len(cmd) == 0:
+            raise RuntimeError("Failed to find elasticsearch please add to PATH or provide location in cmd")
+
         self._cmd = cmd
 
         self._foreground = foreground
