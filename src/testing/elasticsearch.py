@@ -22,7 +22,7 @@ def _unused_port():
 
 
 class ElasticSearchServer(object):
-    def __init__(self, root=None, cmd=None, foreground=True):
+    def __init__(self, root=None, cmd=None, foreground=True, config=None):
         """
         root:  Root directory for elasticsearch data and logs. This directory will
                contain index data and logs for this instance of elasticsearch.
@@ -44,6 +44,16 @@ class ElasticSearchServer(object):
         if cmd is None:
             cmd = str(clom.which('elasticsearch').shell())
         self._cmd = cmd
+        self.config = {
+            # disable this instance from trying to join a cluster
+            'node.master': 'true',
+            'node.local': 'true',
+            'discovery.zen.ping.multicast.enabled': 'false',
+            'logger.level': 'DEBUG',
+        }
+
+        if config is not None:
+            self.config.update(config)
 
         self._foreground = foreground
 
@@ -87,11 +97,21 @@ class ElasticSearchServer(object):
             self._use_tmp_dir = True
             self._root = tempfile.mkdtemp(suffix='-elastic')
 
-        self._data_path = os.path.join(self._root, 'data')
-        self._logs_path = os.path.join(self._root, 'logs')
+        self.config['path.data'] = self._data_path = os.path.join(self._root, 'data')
+        self.config['path.logs'] = self._logs_path = os.path.join(self._root, 'logs')
 
-        self._bind_host = "127.0.0.1"
-        self._bind_port = _unused_port()
+        self.config['network.bind_host'] = self.config['network.host'] = self._bind_host = "127.0.0.1"
+        self.config['http.port'] = self._bind_port = _unused_port()
+
+    @property
+    def arguments(self):
+        args = [
+            '-Des.{0}={1}'.format(key, value)
+            for key, value in self.config.items()
+        ]
+        if self._foreground:
+            args.append('-f')
+        return args
 
     def start(self):
         """
@@ -105,35 +125,8 @@ class ElasticSearchServer(object):
 
         pid = os.fork()
         if pid == 0:
-            bind_host = '-Des.network.bind_host=%s' % self._bind_host
-            network_host = '-Des.network.host=%s' % self._bind_host
-            bind_port = '-Des.http.port=%s' % self._bind_port
-            data_path = '-Des.path.data=%s' % self._data_path
-            logs_path = '-Des.path.logs=%s' % self._logs_path
-
-            # Older version of elastic don't automatically stay in the foreground
-            # and need to be instructed with '-f'
-            foreground = ""
-            if self._foreground:
-                foreground = "-f"
-
             try:
-                os.execl(
-                    self._cmd,
-                    self._cmd,
-                    bind_host,
-                    network_host,
-                    bind_port,
-                    data_path,
-                    logs_path,
-
-                    # Disable this instance from trying to join a cluster.
-                    "-Des.node.master=true",
-                    "-Des.node.local=true",
-                    "-Des.discovery.zen.ping.multicast.enabled=false",
-                    "-Des.logger.level=DEBUG",
-                    foreground
-                )
+                os.execl(self._cmd, self._cmd, *self.arguments)
             except Exception:
                 raise RuntimeError("Could not start elasticsearch.")
         else:
