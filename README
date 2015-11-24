@@ -16,7 +16,7 @@ Example usage:
 
     # launch new elasticsearch server:
     with testing.elasticsearch.ElasticSearchServer() es:
-        elasticsearch = ES(es.dsn())
+        elasticsearch = ES(es.uri())
         # perform any testing with elasticsearch here
 
     # elasticsearch server is terminated and cleaned up here
