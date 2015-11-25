@@ -49,7 +49,6 @@ class ElasticSearchServer(object):
             'node.master': 'true',
             'node.local': 'true',
             'discovery.zen.ping.multicast.enabled': 'false',
-            'logger.level': 'DEBUG',
         }
 
         if config is not None:
