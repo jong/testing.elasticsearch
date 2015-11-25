@@ -22,6 +22,21 @@ Example usage:
     # elasticsearch server is terminated and cleaned up here
 
 
+You can change the server configuration by specifying a `config` dict:
+
+
+    with ElasticSearchServer(config={'logger.level': 'DEBUG'}) as es:
+        ...
+
+
+...or by setting them on the `config` attribute before starting the server:
+
+
+    es = ElasticSearchServer()
+    es.config['logger.level'] = 'DEBUG'
+    es.start()
+
+
 You can also setup a pytest fixture:
 
 
