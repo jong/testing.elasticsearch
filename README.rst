@@ -6,10 +6,9 @@ temporary directory, and destroys it after testing. It's useful as a pytest
 fixture for testing interactions with elasticsearch in an isolated manner.
 
 
-Implementation is based off the awesome [testing.redis](https://bitbucket.org/tk0miya/testing.redis) module.
+Implementation is based off the awesome  `testing.redis <https://bitbucket.org/tk0miya/testing.redis>`_ module.
 
-Example usage:
-
+Example usage::
 
     import testing.elasticsearch
     import pyes.es import ES
@@ -22,8 +21,7 @@ Example usage:
     # elasticsearch server is terminated and cleaned up here
 
 
-You can also setup a pytest fixture:
-
+You can also setup a pytest fixture::
 
     @pytest.fixture(scope='session')
     def elasticsearch(request):
