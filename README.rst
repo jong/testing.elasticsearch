@@ -25,6 +25,7 @@ Example usage:
 
 You can change the server configuration by specifying a `config` dict:
 
+.. code-block:: python
 
     with ElasticSearchServer(config={'logger.level': 'DEBUG'}) as es:
         ...
@@ -32,6 +33,7 @@ You can change the server configuration by specifying a `config` dict:
 
 ...or by setting them on the `config` attribute before starting the server:
 
+.. code-block:: python
 
     es = ElasticSearchServer()
     es.config['logger.level'] = 'DEBUG'
