@@ -5,8 +5,8 @@ import signal
 from shutil import rmtree
 from time import sleep
 from datetime import datetime
+from subprocess import Popen, PIPE
 
-from clom import clom
 import requests
 
 
@@ -42,7 +42,11 @@ class ElasticSearchServer(object):
             # elasticsearch terminated here when context exits
         """
         if cmd is None:
-            cmd = str(clom.which('elasticsearch').shell())
+            es_check = Popen(['which', 'elasticsearch'], stdout=PIPE)
+            cmd = es_check.stdout.read().strip()
+        if not cmd or len(cmd) == 0:
+            raise RuntimeError("Failed to find elasticsearch please add to PATH or provide location in cmd")
+
         self._cmd = cmd
         self.config = {
             # disable this instance from trying to join a cluster

@@ -23,8 +23,7 @@ def main():
         ],
         long_description=open('README.rst').read(),
         install_requires=[
-            "clom>=0.7.5",
-            "requests>=2.6.0",
+            "requests==2.6.0",
         ],
     )
 
