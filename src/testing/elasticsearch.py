@@ -2,12 +2,16 @@ import tempfile
 import socket
 import os
 import signal
+import logging
 from shutil import rmtree
 from time import sleep
 from datetime import datetime
 from subprocess import Popen, PIPE
 
 import requests
+
+
+_log = logging.getLogger(__name__)
 
 
 __all__ = ['ElasticSearchServer']
@@ -107,6 +111,20 @@ class ElasticSearchServer(object):
         self.config['http.port'] = self._bind_port = _unused_port()
 
     @property
+    def logs_path(self):
+        """
+        Returns the directory where logs are stored
+        """
+        return self._logs_path
+
+    @property
+    def data_path(self):
+        """
+        Returns the directory where data is stored
+        """
+        return self._data_path
+
+    @property
     def arguments(self):
         args = [
             '-Des.{0}={1}'.format(key, value)
@@ -128,6 +146,8 @@ class ElasticSearchServer(object):
 
         pid = os.fork()
         if pid == 0:
+            _log.debug('Starting elasticsearch with %s %s' % (
+                self._cmd, ' '.join(self.arguments)))
             try:
                 os.execl(self._cmd, self._cmd, *self.arguments)
             except Exception:

@@ -27,7 +27,11 @@ You can change the server configuration by specifying a `config` dict:
 
 .. code-block:: python
 
-    with ElasticSearchServer(config={'logger.level': 'DEBUG'}) as es:
+    with ElasticSearchServer(config={
+        'logger.level': 'DEBUG',
+        # Keep index in memory
+        'index.store.type': 'mmapfs',
+    }) as es:
         ...
 
 

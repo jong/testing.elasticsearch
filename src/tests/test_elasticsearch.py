@@ -1,4 +1,5 @@
 from testing.elasticsearch import ElasticSearchServer
+from glob import glob
 import os
 import tempfile
 import requests
@@ -80,6 +81,19 @@ def test_elasticsearch_existing_dir():
 
     paths = os.listdir(tmp_dir)
     assert 'data' in paths, "elasticsearch data directory should not have been removed."
-    assert os.path.isdir(os.path.join(tmp_dir, 'data'))
+    assert os.path.isdir(es.data_path)
     assert 'logs' in paths, "elasticsearch logs directory should not have been removed."
-    assert os.path.isdir(os.path.join(tmp_dir, 'logs'))
+    assert os.path.isdir(es.logs_path)
+
+
+def test_elasticsearch_config():
+    """
+    Verify that config options can be passed in
+    """
+    es = ElasticSearchServer(config={
+        'logger.level': 'INFO',
+        'index.store.type': 'mmapfs',
+    })
+
+    assert '-Des.index.store.type=mmapfs' in es.arguments
+    assert '-Des.logger.level=INFO' in es.arguments
