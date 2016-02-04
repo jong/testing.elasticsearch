@@ -6,10 +6,11 @@ temporary directory, and destroys it after testing. It's useful as a pytest
 fixture for testing interactions with elasticsearch in an isolated manner.
 
 
-Implementation is based off the awesome [testing.redis](https://bitbucket.org/tk0miya/testing.redis) module.
+Implementation is based off the awesome  `testing.redis <https://bitbucket.org/tk0miya/testing.redis>`_ module.
 
 Example usage:
 
+.. code-block:: python
 
     import testing.elasticsearch
     import pyes.es import ES
@@ -24,6 +25,7 @@ Example usage:
 
 You can also setup a pytest fixture:
 
+.. code-block:: python
 
     @pytest.fixture(scope='session')
     def elasticsearch(request):
@@ -39,11 +41,10 @@ You can also setup a pytest fixture:
 Testing
 -------
 
-To run tests you'll need to install the test requirements:
-
+To run tests you'll need to install the test requirements::
 
     pip install -r src/tests/requirements.txt
 
-Run tests:
+Run tests::
 
     python src/tests/runtests.py
