@@ -6,3 +6,12 @@ __pycache__/
 *.idea
 MANIFEST
 dist
+
+# test-related stuff
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+*,cover
