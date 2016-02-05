@@ -6,6 +6,7 @@ __pycache__/
 *.idea
 MANIFEST
 dist
+build
 
 # test-related stuff
 htmlcov/
