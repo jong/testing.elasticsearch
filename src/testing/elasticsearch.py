@@ -130,8 +130,8 @@ class ElasticSearchServer(object):
             '-Des.{0}={1}'.format(key, value)
             for key, value in self.config.items()
         ]
-        if self._foreground:
-            args.append('-f')
+        if not self._foreground:
+            args.append('-d')
         return args
 
     def start(self):
