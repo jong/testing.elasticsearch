@@ -1,0 +1,11 @@
+language: python
+python:
+  - "2.7"
+install: pip install tox==2.3.1
+script: tox
+before_install:
+  - export JONG_BUILD_DIR=`pwd`
+  - mkdir /tmp/elasticsearch
+  - cd /tmp/elasticsearch && wget https://github.com/elastic/elasticsearch/archive/v1.5.2.tar.gz && tar xzvf v1.5.2.tar.gz  --strip-components=1
+  - export PATH=/tmp/elasticsearch/bin:$PATH
+  - cd $JONG_BUILD_DIR
